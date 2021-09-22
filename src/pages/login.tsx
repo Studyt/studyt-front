@@ -1,16 +1,16 @@
 import {
-    Image,
-    Flex,
-    Box,
-    Input,
-    FormLabel,
-    FormControl,
-    FormErrorMessage,
-    Container,
-    Heading,
-    Spacer,
-    Button,
-    Text
+	Image,
+	Flex,
+	Box,
+	Input,
+	FormLabel,
+	FormControl,
+	FormErrorMessage,
+	Container,
+	Heading,
+	Spacer,
+	Button,
+	Text
 } from '@chakra-ui/react';
 import { Field, FieldProps, Form, Formik } from 'formik';
 import { verify } from 'jsonwebtoken';
@@ -36,124 +36,124 @@ interface LoginResponse {
 }
 
 export const Login = () => {
-    const initialValues: FormValues = {
-        email: '',
-        password: ''
-    };
+	const initialValues: FormValues = {
+		email: '',
+		password: ''
+	};
 
-    const history = useHistory();
-    const dispatch = useAppDispatch();
+	const history = useHistory();
+	const dispatch = useAppDispatch();
 
-    const onSubmit = async (email: string, password: string) => {
-        try {
-            const res = await api.post<{token: string}>('/auth/login', {
-                email, password
-            });
-            console.log(res);
-            const decoded = verify(res.data?.token as string, process.env.REACT_APP_STUDYT_SECRET as string) as LoginResponse;
+	const onSubmit = async (email: string, password: string) => {
+		try {
+			const res = await api.post<{token: string}>('/auth/login', {
+				email, password
+			});
+			console.log(res);
+			const decoded = verify(res.data?.token as string, process.env.REACT_APP_STUDYT_SECRET as string) as LoginResponse;
     
-            dispatch(logIn({
-                ...decoded,
-                id: decoded.sub,
-                token: res.data?.token as string
-            }));
-        } catch (error) {
-            alert(error);
-            return;
-        }
+			dispatch(logIn({
+				...decoded,
+				id: decoded.sub,
+				token: res.data?.token as string
+			}));
+		} catch (error) {
+			alert(error);
+			return;
+		}
 
-    };
+	};
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 1 }}
-            transition={{duration: 0.5}}
-        >
-            <Flex
-                overflow="hidden"
-                h="100vh"
-                justifyContent="center"
-                alignItems="center"
-            >
-                <>
-                    <Image
-                        src={bg}
-                        h="100vh"
-                        w="100vw"
-                        objectFit="cover"
-                        position="absolute"
-                    />
-                    <Box
-                        bgColor="rgba(192, 128, 255, 0.5)"
-                        w="full"
-                        h="full"
-                        position="absolute"
-                        />
-                </>
-                <Container
-                    h="380px"
-                    w="md"
-                    bgColor="studyt.dark"
-                    zIndex="dropdown"
-                    justifyContent="space-evenly"
-                    alignItems="center"
-                    display="flex"
-                    flexDir="column"
-                    borderRadius="10"
-                    >
-                    <Heading color="white">Login</Heading>
-                    <Formik
-                        initialValues={initialValues}
-                        onSubmit={async (values, actions) => {
-                            await onSubmit(values.email, values.password);
-                            history.push('/');
-                        }}
-                    >
-                        {(props) => (
-                            <Form>
-                                <Flex
-                                    flexDir="column"
-                                    h="40vh"
-                                >
-                                    <Field name="email">
-                                        {({ field, form }: FieldProps) => (
-                                            <FormControl isInvalid={!!(form.errors.email && form.touched.email)}>
-                                                <FormLabel color="white" htmlFor="email">Email</FormLabel>
-                                                <Input w="xs" bg="#f1f1f1" {...field} id="email" placeholder="E-mail" />
-                                                <FormErrorMessage>{form.errors.email}</FormErrorMessage>
-                                            </FormControl>
-                                        )}
-                                    </Field>
-                                    <Spacer />
-                                    <Field name="password">
-                                        {({ field, form }: FieldProps) => (
-                                            <FormControl isInvalid={!!(form.errors.password && form.touched.password)}>
-                                                <FormLabel color="white" htmlFor="password">Senha</FormLabel>
-                                                <Input w="xs" bg="#f1f1f1" {...field} id="password" placeholder="Senha" />
-                                                <FormErrorMessage>{form.errors.password}</FormErrorMessage>
-                                            </FormControl>
-                                        )}
-                                    </Field>
-                                    <Spacer />
-                                    <Spacer />
-                                    <Button bgColor="studyt.light" type="submit">Entrar</Button>
-                                    <Flex justifyContent="space-between">
-                                        <Link to="/register">
-                                            <Text color="white" as="u">Cadastro</Text>
+	return (
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 1 }}
+			transition={{duration: 0.5}}
+		>
+			<Flex
+				overflow="hidden"
+				h="100vh"
+				justifyContent="center"
+				alignItems="center"
+			>
+				<>
+					<Image
+						src={bg}
+						h="100vh"
+						w="100vw"
+						objectFit="cover"
+						position="absolute"
+					/>
+					<Box
+						bgColor="rgba(192, 128, 255, 0.5)"
+						w="full"
+						h="full"
+						position="absolute"
+					/>
+				</>
+				<Container
+					h="380px"
+					w="md"
+					bgColor="studyt.dark"
+					zIndex="dropdown"
+					justifyContent="space-evenly"
+					alignItems="center"
+					display="flex"
+					flexDir="column"
+					borderRadius="10"
+				>
+					<Heading color="white">Login</Heading>
+					<Formik
+						initialValues={initialValues}
+						onSubmit={async (values, actions) => {
+							await onSubmit(values.email, values.password);
+							history.push('/');
+						}}
+					>
+						{(props) => (
+							<Form>
+								<Flex
+									flexDir="column"
+									h="40vh"
+								>
+									<Field name="email">
+										{({ field, form }: FieldProps) => (
+											<FormControl isInvalid={!!(form.errors.email && form.touched.email)}>
+												<FormLabel color="white" htmlFor="email">Email</FormLabel>
+												<Input w="xs" bg="#f1f1f1" {...field} id="email" placeholder="E-mail" />
+												<FormErrorMessage>{form.errors.email}</FormErrorMessage>
+											</FormControl>
+										)}
+									</Field>
+									<Spacer />
+									<Field name="password">
+										{({ field, form }: FieldProps) => (
+											<FormControl isInvalid={!!(form.errors.password && form.touched.password)}>
+												<FormLabel color="white" htmlFor="password">Senha</FormLabel>
+												<Input w="xs" bg="#f1f1f1" {...field} id="password" placeholder="Senha" />
+												<FormErrorMessage>{form.errors.password}</FormErrorMessage>
+											</FormControl>
+										)}
+									</Field>
+									<Spacer />
+									<Spacer />
+									<Button bgColor="studyt.light" type="submit">Entrar</Button>
+									<Flex justifyContent="space-between">
+										<Link to="/register">
+											<Text color="white" as="u">Cadastro</Text>
 
-                                        </Link>
-                                        <Link to="/reset-password">
-                                            <Text color="white" as="u">Esqueci minha senha</Text>
-                                        </Link>
-                                    </Flex>
-                                </Flex>
-                            </Form>
-                        )}
-                    </Formik>
-                </Container>
-            </Flex>
-        </motion.div>
-    );
-}
+										</Link>
+										<Link to="/reset-password">
+											<Text color="white" as="u">Esqueci minha senha</Text>
+										</Link>
+									</Flex>
+								</Flex>
+							</Form>
+						)}
+					</Formik>
+				</Container>
+			</Flex>
+		</motion.div>
+	);
+};
