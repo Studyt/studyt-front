@@ -9,18 +9,35 @@ import {
 	Container,
 	Heading,
 	Spacer,
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalFooter,
+	ModalBody,
+	ModalCloseButton,
+	useDisclosure,
 	Button,
-	Text
+	VStack
 } from '@chakra-ui/react';
-import bg from '../images/register_bg.png';
+import { useHistory } from 'react-router-dom';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Field, FieldProps, Form, Formik } from 'formik';
+import * as Yup from 'yup';
 
-interface FormValues {
-	name: string;
-	user: string;
+
+import bg from '../images/register_bg.png';
+import { api } from '../services/api';
+
+interface UserRegister {
+	firstName: string;
+	lastName: string;
 	email: string;
 	password: string;
+}
+
+interface FormValues extends UserRegister {
 	confirmedPassword: string;
 }
 
@@ -33,17 +50,42 @@ interface RegisterResponse {
 	__v: number;
 }
 
-const onSubmit = async () => {
-	1;
-};
+const RegisterSchema = Yup.object().shape({
+	firstName: Yup.string().max(30, 'O nome não pode ultrapassar 30 caracteres').required('Obrigatório'),
+	lastName: Yup.string().max(50, 'O sobrenome não pode ultrapassar 50 caracteres').required('Obrigatório'),
+	email: Yup.string().email('Email inválido').required('Obrigatório'),
+	password: Yup.string().min(8, 'Insira uma senha maior que 8 caracteres').max(32, 'Insira uma senha menor ou igual a 32 caracteres').required('Obrigatório'),
+	confirmedPassword: Yup.string().min(8, 'Insira uma senha maior que 8 caracteres').max(32, 'Insira uma senha menor ou igual a 32 caracteres').required('Obrigatório').oneOf([Yup.ref('password'), null], 'As senhas devem ser iguais'),
+});
+
 
 export const Register = () => {
 	const initialValues: FormValues = {
-		name: '',
-		user: '',
+		firstName: '',
+		lastName: '',
 		email: '',
 		password: '',
 		confirmedPassword: ''
+	};
+
+	const history = useHistory();
+	const { isOpen, onOpen, onClose } = useDisclosure();
+	const [errorMessage, setErrorMessage] = useState('');
+
+	const strategy = {
+		200: () => {
+			history.push('/login');
+		},
+		409: () => {
+			setErrorMessage('Email já em uso. Insira um outro email válido.');
+			onOpen();
+		}
+	};
+
+	const onSubmit = async (UserRegister: UserRegister) => {
+		const res = await api.post('/auth/register', UserRegister);
+		console.log(res);
+		strategy[res.status as keyof typeof strategy]();
 	};
 
 	return (
@@ -76,8 +118,13 @@ export const Register = () => {
 					/>
 				</>
 				<Container
-					h="590px"
+					h={{
+						base: 'lg',
+						md: 'xl',
+						lg: '2xl'
+					}}
 					w="545px"
+					p="1"
 					bgColor="studyt.dark"
 					zIndex="dropdown"
 					justifyContent="space-evenly"
@@ -89,85 +136,90 @@ export const Register = () => {
 					<Heading color="white">Cadastro</Heading>
 					<Formik
 						initialValues={initialValues}
+						validationSchema={RegisterSchema}
 						onSubmit={onSubmit}
 					>
 						{(props) => (
 							<Form>
-								<Flex
-									flexDir="column"
-									h="61vh"
+								<VStack
+									spacing="2"
 								>
-									<Field name="nome">
+									<Field name="firstName">
 										{
 											({ field, form }: FieldProps) => (
 												<FormControl
-													isInvalid={!!(form.errors.nome && form.touched.nome)}
+													isInvalid={!!(form.errors.firstName && form.touched.firstName)}
 												>
-													<FormLabel color="white" htmlFor="nome">Nome completo</FormLabel>
-													<Input w="xs" bg="#f1f1f1" {...field} id="nome" placeholder="Nome completo" />
-													<FormErrorMessage>{form.errors.nome}</FormErrorMessage>
+													<FormLabel color="white" htmlFor="firstName">Nome</FormLabel>
+													<Input w="xs" bg="#f1f1f1" {...field} id="firstName" placeholder="Nome" />
+													<FormErrorMessage color="#FF2424">{form.errors.firstName}</FormErrorMessage>
 												</FormControl>
 											)
 										}
 									</Field>
-									<Spacer />
-									<Field name="user">
+									<Field name="lastName">
 										{
 											({ field, form }: FieldProps) => (
 												<FormControl
-													isInvalid={!!(form.errors.user && form.touched.user)}
+													isInvalid={!!(form.errors.lastName && form.touched.lastName)}
 												>
-													<FormLabel color="white" htmlFor="user">Usuário</FormLabel>
-													<Input w="xs" bg="#f1f1f1" {...field} id="user" placeholder="Usuário" />
-													<FormErrorMessage>{form.errors.user}</FormErrorMessage>
+													<FormLabel color="white" htmlFor="lastName">Sobrenome</FormLabel>
+													<Input w="xs" bg="#f1f1f1" {...field} id="lastName" placeholder="Sobrenome" />
+													<FormErrorMessage color="#FF2424">{form.errors.lastName}</FormErrorMessage>
 												</FormControl>
 											)
 										}
 									</Field>
-									<Spacer />
 									<Field name="email">
 										{({ field, form }: FieldProps) => (
 											<FormControl isInvalid={!!(form.errors.email && form.touched.email)}>
 												<FormLabel color="white" htmlFor="email">Email</FormLabel>
 												<Input w="xs" bg="#f1f1f1" {...field} id="email" placeholder="E-mail" />
-												<FormErrorMessage>{form.errors.email}</FormErrorMessage>
+												<FormErrorMessage color="#FF2424">{form.errors.email}</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
-									<Spacer />
 									<Field name="password">
 										{({ field, form }: FieldProps) => (
 											<FormControl isInvalid={!!(form.errors.password && form.touched.password)}>
 												<FormLabel color="white" htmlFor="password">Senha</FormLabel>
-												<Input w="xs" bg="#f1f1f1" {...field} id="password" placeholder="Senha" />
-												<FormErrorMessage>{form.errors.password}</FormErrorMessage>
+												<Input w="xs" bg="#f1f1f1" type="password" {...field} id="password" placeholder="Senha" />
+												<FormErrorMessage color="#FF2424">{form.errors.password}</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
-									<Spacer />
-									<Field name="confirmPassword">
+									<Field name="confirmedPassword">
 										{({ field, form }: FieldProps) => (
-											<FormControl isInvalid={!!(form.errors.confirmPassword && form.touched.confirmPassword)}>
-												<FormLabel color="white" htmlFor="confirmPassword">Confirmar senha</FormLabel>
-												<Input w="xs" bg="#f1f1f1" {...field} id="confirmPassword" placeholder="Confirmar senha" />
-												<FormErrorMessage>{form.errors.password}</FormErrorMessage>
+											<FormControl isInvalid={!!(form.errors.confirmedPassword && form.touched.confirmedPassword)}>
+												<FormLabel color="white" htmlFor="confirmedPassword">Confirmar senha</FormLabel>
+												<Input w="xs" bg="#f1f1f1" type="password" {...field} id="confirmedPassword" placeholder="Confirmar senha" />
+												<FormErrorMessage color="#FF2424">{form.errors.confirmedPassword}</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
-									<Spacer />
-									<Spacer />
-									<Spacer />
-									<Spacer />
-									<Spacer />
-									<Spacer />
-									<Spacer />
-									<Button bgColor="studyt.light" type="submit">Cadastrar</Button>
-								</Flex>
+									<Box h="3" />
+									<Button w="xs" bgColor="studyt.light" type="submit">Cadastrar</Button>
+								</VStack>
 							</Form>
 						)}
 					</Formik>
 				</Container>
 			</Flex>
+
+			<Modal onClose={onClose} isOpen={isOpen} isCentered>
+				<ModalOverlay />
+				<ModalContent>
+					<ModalHeader>Erro</ModalHeader>
+					<ModalCloseButton />
+					<ModalBody>
+						{errorMessage}
+					</ModalBody>
+					<ModalFooter>
+						<Button onClick={onClose}>Fechar</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+
 		</motion.div>
 	);
 };

@@ -13,6 +13,7 @@ import {
 	Text
 } from '@chakra-ui/react';
 import { Field, FieldProps, Form, Formik } from 'formik';
+import * as Yup from 'yup';
 import { verify } from 'jsonwebtoken';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -25,15 +26,20 @@ import { logIn } from '../store/auth';
 import { useHistory } from 'react-router';
 
 interface FormValues {
-    email: string;
-    password: string;
+	email: string;
+	password: string;
 }
 
 interface LoginResponse {
-    email: string;
-    sub: string;
-    name: string;
+	email: string;
+	sub: string;
+	name: string;
 }
+
+const LoginSchema = Yup.object().shape({
+	email: Yup.string().email('Email inválido').required('Obrigatório'),
+	password: Yup.string().min(8, 'Insira uma senha maior que 8 caracteres').max(32, 'Insira uma senha menor ou igual a 32 caracteres').required('Obrigatório'),
+});
 
 export const Login = () => {
 	const initialValues: FormValues = {
@@ -46,12 +52,12 @@ export const Login = () => {
 
 	const onSubmit = async (email: string, password: string) => {
 		try {
-			const res = await api.post<{token: string}>('/auth/login', {
+			const res = await api.post<{ token: string }>('/auth/login', {
 				email, password
 			});
 			console.log(res);
 			const decoded = verify(res.data?.token as string, process.env.REACT_APP_STUDYT_SECRET as string) as LoginResponse;
-    
+
 			dispatch(logIn({
 				...decoded,
 				id: decoded.sub,
@@ -69,7 +75,7 @@ export const Login = () => {
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 1 }}
-			transition={{duration: 0.5}}
+			transition={{ duration: 0.5 }}
 		>
 			<Flex
 				overflow="hidden"
@@ -106,6 +112,7 @@ export const Login = () => {
 					<Heading color="white">Login</Heading>
 					<Formik
 						initialValues={initialValues}
+						validationSchema={LoginSchema}
 						onSubmit={async (values, actions) => {
 							await onSubmit(values.email, values.password);
 							history.push('/');
@@ -122,7 +129,7 @@ export const Login = () => {
 											<FormControl isInvalid={!!(form.errors.email && form.touched.email)}>
 												<FormLabel color="white" htmlFor="email">Email</FormLabel>
 												<Input w="xs" bg="#f1f1f1" {...field} id="email" placeholder="E-mail" />
-												<FormErrorMessage>{form.errors.email}</FormErrorMessage>
+												<FormErrorMessage color="#FF2424">{form.errors.email}</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
@@ -131,8 +138,8 @@ export const Login = () => {
 										{({ field, form }: FieldProps) => (
 											<FormControl isInvalid={!!(form.errors.password && form.touched.password)}>
 												<FormLabel color="white" htmlFor="password">Senha</FormLabel>
-												<Input w="xs" bg="#f1f1f1" {...field} id="password" placeholder="Senha" />
-												<FormErrorMessage>{form.errors.password}</FormErrorMessage>
+												<Input w="xs" bg="#f1f1f1" type="password" {...field} id="password" placeholder="Senha" />
+												<FormErrorMessage color="#FF2424">{form.errors.password}</FormErrorMessage>
 											</FormControl>
 										)}
 									</Field>
