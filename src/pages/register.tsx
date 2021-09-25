@@ -8,7 +8,6 @@ import {
 	FormErrorMessage,
 	Container,
 	Heading,
-	Spacer,
 	Modal,
 	ModalOverlay,
 	ModalContent,

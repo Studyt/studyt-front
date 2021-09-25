@@ -18,7 +18,7 @@ export const Routes = () => {
 				<ProtectedRoute exact path="/" component={Home} />
 				<Route path="/login" component={Login} />
 				<Route path="/confirmation/:token" component={TokenConfirmation} />
-                <Route path="/register" component={Register} />
+				<Route path="/register" component={Register} />
 			</Switch>
 		</AnimatePresence>
 	);
