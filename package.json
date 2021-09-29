@@ -19,6 +19,7 @@
     "formik": "^2.2.9",
     "framer-motion": "^4.1.17",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hookedup": "^0.1.2",
