@@ -56,7 +56,7 @@ export const Login = () => {
 				email, password
 			});
 			api.setHeader('Authorization', `Bearer ${res.data?.token}` as string);
-			const decoded = verify(res.data?.token as string, process.env.REACT_APP_STUDYT_SECRET as string) as LoginResponse;
+			const decoded = verify(res.data?.token as string, '8be2ea05eb7eeb5ec7898fed5ac0cd9523e9583e1d64bfa0098cf077470c8481') as LoginResponse;
 
 			dispatch(logIn({
 				...decoded,

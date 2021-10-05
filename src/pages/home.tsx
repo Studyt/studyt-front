@@ -22,6 +22,8 @@ import * as Yup from 'yup';
 
 import { api } from '../services/api';
 import { useHistory } from 'react-router-dom';
+import { Header } from '../components/header';
+import { Subjects } from '../components/subjects';
 
 interface FormValues {
 	label: string;
@@ -46,6 +48,8 @@ export const Home = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const [errorMessage, setErrorMessage] = useState('');
 
+	const result = await api.get('/users');
+
 	const strategy = {
 		200: () => {
 			history.push('/login');
@@ -59,7 +63,7 @@ export const Home = () => {
 	const onSubmit = async (SubjectRegister: FormValues) => {
 		const res = await api.post('/subject', SubjectRegister);
 		console.log(res);
-		strategy[res.status as keyof typeof strategy]();
+		strategy[res.status as keyof typeof strategy];
 	};
 
 	const initialValues: FormValues = {
@@ -73,6 +77,8 @@ export const Home = () => {
 
 	return (
 		<>
+			<Header />
+			<Subjects name="oi" startDate="a" endDate="b" label="AAA" />
 			<Button onClick={onOpen} bgColor="studyt.light" type="submit">Criar disciplina</Button>
 			<Modal size="3xl" onClose={onClose} isOpen={isOpen} isCentered>
 				<ModalOverlay />

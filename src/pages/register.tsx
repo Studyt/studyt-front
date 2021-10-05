@@ -84,7 +84,7 @@ export const Register = () => {
 	const onSubmit = async (UserRegister: UserRegister) => {
 		const res = await api.post('/auth/register', UserRegister);
 		console.log(res);
-		strategy[res.status as keyof typeof strategy]();
+		strategy[res.status as keyof typeof strategy];
 	};
 
 	return (

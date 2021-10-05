@@ -10,13 +10,13 @@ export const TokenConfirmation = () => {
 
 	useEffect(() => {
 		const confirmAccount = async () => {
-			await fetch(`${process.env.REACT_APP_STUDYT_API_URL}/auth/confirmation/${token}`, {
+			await fetch('http://localhost:1234' + `/auth/confirmation/${token}`, {
 				method: 'POST'
 			});
 		};
 		confirmAccount();
 	}, []);
-    
+
 	useTimeoutFn(() => history.replace('/login'), 1000);
 
 	return (
