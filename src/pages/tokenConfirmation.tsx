@@ -10,7 +10,7 @@ export const TokenConfirmation = () => {
 
 	useEffect(() => {
 		const confirmAccount = async () => {
-			await fetch('http://localhost:1234' + `/auth/confirmation/${token}`, {
+			await fetch(process.env.REACT_APP_STUDYT_API_URL + `/auth/confirmation/${token}`, {
 				method: 'POST'
 			});
 		};
