@@ -18,24 +18,14 @@ export const Header = () => {
       </Link>
       <Spacer />
       <HStack alignItems="center" spacing="10">
-        <Link to="/disciplinas">
+        <Link to="/">
           <Heading as="h3" size="md" color="white">
-            Disciplinas
+            Dashboard
           </Heading>
         </Link>
         <Link to="/tarefas">
           <Heading as="h3" size="md" color="white">
             Tarefas
-          </Heading>
-        </Link>
-        <Link to="/tarefas">
-          <Heading as="h3" size="md" color="white">
-            Tarefas
-          </Heading>
-        </Link>
-        <Link to="/perfil">
-          <Heading as="h3" size="md" color="white">
-            Perfil
           </Heading>
         </Link>
       </HStack>
