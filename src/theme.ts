@@ -8,7 +8,8 @@ export const theme = extendTheme({
 	colors: {
 		studyt: {
 			dark: '#3F004B',
-			light: '#C080FF'
+			light: '#C080FF',
+			bg: '#F0EAF2'
 		}
 	}
 });

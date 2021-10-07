@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Text,
   Box,
@@ -24,15 +24,15 @@ import {
   Thead,
   Tr,
   Th,
-} from "@chakra-ui/react";
-import { Field, FieldProps, Form, Formik } from "formik";
-import * as Yup from "yup";
+} from '@chakra-ui/react';
+import { Field, FieldProps, Form, Formik } from 'formik';
+import * as Yup from 'yup';
 
-import { api } from "../services/api";
-import { useHistory } from "react-router-dom";
-import { Subjects } from "../components/subjects";
-import { Subject } from "../models";
-import { motion } from "framer-motion";
+import { api } from '../services/api';
+import { useHistory } from 'react-router-dom';
+import { Subjects } from '../components/subjects';
+import { Subject } from '../models';
+import { motion } from 'framer-motion';
 
 interface FormValues {
   label: string;
@@ -40,43 +40,48 @@ interface FormValues {
   startDate: string;
   endDate: string;
   exams: number;
-  abscences: number;
+  maxAbscences: number;
 }
 
 const SubjectSchema = Yup.object().shape({
   label: Yup.string()
-    .min(4, "O código da disciplina deve possuir pelo menos 4 caracteres")
-    .max(6, "O código da disciplina deve possuir até 6 caracteres")
-    .required("Obrigatório"),
+    .min(4, 'O código da disciplina deve possuir pelo menos 4 caracteres')
+    .max(6, 'O código da disciplina deve possuir até 6 caracteres')
+    .required('Obrigatório'),
   name: Yup.string()
-    .max(50, "O nome da disciplina não pode ultrapassar 50 caracteres")
-    .required("Obrigatório"),
+    .max(50, 'O nome da disciplina não pode ultrapassar 50 caracteres')
+    .required('Obrigatório'),
   startDate: Yup.date()
-    .typeError("Insira uma data válida")
-    .required("Obrigatório"),
+    .typeError('Insira uma data válida')
+    .required('Obrigatório'),
   endDate: Yup.date()
-    .typeError("Insira uma data válida")
-    .required("Obrigatório"),
+    .typeError('Insira uma data válida')
+    .required('Obrigatório'),
   exams: Yup.number()
-    .typeError("Insira um número inteiro")
-    .positive("A quantidade precisa ser maior que zero")
-    .min(1, "A disciplina precisa ter pelo menos uma prova")
-    .required("Obrigatório"),
+    .typeError('Insira um número inteiro')
+    .positive('A quantidade precisa ser maior que zero')
+    .min(1, 'A disciplina precisa ter pelo menos uma prova')
+    .required('Obrigatório'),
+  maxAbscences: Yup.number()
+    .typeError('Insira um número inteiro')
+    .positive('A quantidade precisa ser maior que zero')
+    .min(1, 'A disciplina precisa ter um máximo de faltar maior ou igual a um')
+    .required('Obrigatório'),
 });
 
 export const Home = () => {
   const history = useHistory();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [subjects, setSubjects] = useState<Subject[]>();
 
   const loadData = async () => {
-    const res = await api.get<Subject[]>("/subject");
+    const res = await api.get<Subject[]>('/subject');
     console.log(res);
     setSubjects(res.data);
   };
-  
+
   useEffect(() => {
     loadData();
   }, []);
@@ -86,23 +91,23 @@ export const Home = () => {
       loadData();
     },
     409: () => {
-      setErrorMessage("Essa disciplina já foi criada.");
+      setErrorMessage('Essa disciplina já foi criada.');
       onOpen();
     },
   };
 
   const onSubmit = async (SubjectRegister: FormValues) => {
-    const res = await api.post("/subject", SubjectRegister);
+    const res = await api.post('/subject', { ...SubjectRegister, abscences: 0 });
     strategy[res.status as keyof typeof strategy]();
   };
 
   const initialValues: FormValues = {
-    label: "",
-    name: "",
-    startDate: "",
-    endDate: "",
+    label: '',
+    name: '',
+    startDate: '',
+    endDate: '',
     exams: 0,
-    abscences: 0,
+    maxAbscences: 0,
   };
 
   return (
@@ -295,6 +300,30 @@ export const Home = () => {
                         </FormControl>
                       )}
                     </Field>
+                    <Field name="maxAbscences">
+                      {({ field, form }: FieldProps) => (
+                        <FormControl
+                          isInvalid={
+                            !!(form.errors.maxAbscences && form.touched.maxAbscences)
+                          }
+                        >
+                          <FormLabel color="studyt.dark" htmlFor="maxAbscences">
+                            Quantidade máxima de faltas
+                          </FormLabel>
+                          <Input
+                            w="100%"
+                            bg="#f1f1f1"
+                            type="number"
+                            {...field}
+                            id="maxAbscences"
+                            placeholder="Insira a quantidade máxima de faltas da disciplina"
+                          />
+                          <FormErrorMessage color="#FF2424">
+                            {form.errors.maxAbscences}
+                          </FormErrorMessage>
+                        </FormControl>
+                      )}
+                    </Field>
                     <Box h="3" />
                     <Button
                       type="submit"
@@ -302,7 +331,7 @@ export const Home = () => {
                       color="white"
                       w="100%"
                       _hover={{
-                        background: "studyt.light",
+                        background: 'studyt.light',
                       }}
                     >
                       Cadastrar disciplina
