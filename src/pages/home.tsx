@@ -35,6 +35,8 @@ import { useHistory } from 'react-router-dom';
 import { Subjects } from '../components/subjects';
 import { Subject } from '../models';
 import { motion } from 'framer-motion';
+import { Task } from '../models';
+import { Tasks } from '../components/tasks';
 
 interface FormValues {
 	label: string;
@@ -87,11 +89,13 @@ export const Home = () => {
 	const { isOpen: isOpenFeedback, onOpen: onOpenFeedback, onClose: onCloseFeedback } = useDisclosure();
 
 	const [subjects, setSubjects] = useState<Subject[]>();
+	// const [tasks, setTasks] = useState<Task[]>();
 
 	const loadData = async () => {
 		const res = await api.get<Subject[]>('/subject');
-		console.log(res);
+		// const resTasks = await api.get<Task[]>('/task');
 		setSubjects(res.data);
+		// setTasks(resTasks.data);
 	};
 
 	useEffect(() => {
@@ -171,6 +175,71 @@ export const Home = () => {
 											key={s._id}
 										/>
 									))}
+							</Tbody>
+						</Table>
+					</div>
+					<Center>
+						<Button
+							type="submit"
+							bg="studyt.dark"
+							color="white"
+							w="20vw"
+							_hover={{
+								background: 'studyt.light',
+							}}
+							onClick={onOpenFeedback}
+						>
+							Enviar feedback
+						</Button>
+					</Center>
+				</Container>
+			</Flex>
+
+			<Flex bg="studyt.bg" minH="90vh">
+				<Container
+					mt="10"
+					maxH="md"
+					maxW="container.lg"
+					bg="white"
+					borderRadius="md"
+					py="3"
+					display="flex"
+					flexDirection="column"
+					justifyContent="space-between"
+				>
+					<div>
+						<Flex
+							direction="row"
+							justifyContent="space-between"
+						>
+							<Heading>Tarefas</Heading>
+							<Button
+								bg="studyt.dark"
+								color="white"
+								onClick={onOpen}
+							>+ Criar tarefa</Button>
+						</Flex>
+						<Table variant="simple">
+							<Thead>
+								<Tr>
+									<Th>Descrição</Th>
+									<Th>Data</Th>
+									<Th>Status</Th>
+									<Th>Disciplina</Th>
+								</Tr>
+							</Thead>
+							<Tbody>
+								{/* {tasks &&
+									tasks.map((t) => (
+										<Tasks
+											description={t.description}
+											dueDate={t.dueDate}
+											status={t.status}
+											subject={t.subject}
+											_id={t._id}
+											key={t._id}
+										/>
+									))} */}
 							</Tbody>
 						</Table>
 					</div>
