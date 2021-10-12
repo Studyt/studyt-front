@@ -3,25 +3,74 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
 	Container,
+	Text,
 	VStack,
 	Heading,
 	Flex,
 	IconButton,
-	Center
+	Center,
+	Button,
+	Table,
+	Tbody,
+	Th,
+	Thead,
+	Tr,
+	useDisclosure,
+	Box,
+	FormControl,
+	FormErrorMessage,
+	FormLabel,
+	Input,
+	Modal,
+	ModalBody,
+	ModalCloseButton,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
+	Textarea
 } from '@chakra-ui/react';
 import { api } from '../services/api';
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
+import { Tasks } from '../components/tasks';
+import { Task } from '../models';
+import { Formik, Form, Field, FieldProps } from 'formik';
+import * as Yup from 'yup';
+
+interface FormValues {
+	description: string;
+	dueDate: string;
+	status: string;
+}
+
+const TaskSchema = Yup.object().shape({
+	description: Yup.string()
+		.max(40, 'A descrição da tarefa não pode ultrapassar 40 caracteres')
+		.required('Obrigatório'),
+	dueDate: Yup.date()
+		.typeError('Insira uma data válida')
+		.required('Obrigatório'),
+});
 
 export const Subject = () => {
 
 	const { subjectID } = useParams<{ subjectID: string }>();
 
+	const onSubmitTask = async (TaskRegister: FormValues) => {
+		await api.post('/task', { ...TaskRegister, subject: subjectID });
+		loadData();
+	};
+
+	const [tasks, setTasks] = useState<Task[]>();
 	const [subjectLabel, setSubjectLabel] = useState<string>();
 	const [subjectAbscences, setSubjectAbscences] = useState<number>();
 	const [subjectMaxAbscences, setSubjectMaxAbscences] = useState<number>();
+	const { isOpen, onOpen, onClose } = useDisclosure();
+
 	const loadData = async () => {
-		const res = await api.get<{ label: string, abscences: number, maxAbscences: number }>(`/subject/${subjectID}`);
+		const res = await api.get<{ label: string, abscences: number, maxAbscences: number, tasks: Task[] }>(`/subject/${subjectID}`);
 		console.table(res);
+		setTasks(res.data?.tasks);
 		setSubjectLabel(res.data?.label);
 		setSubjectAbscences(res.data?.abscences);
 		setSubjectMaxAbscences(res.data?.maxAbscences);
@@ -33,6 +82,12 @@ export const Subject = () => {
 	const changeAbscences = (type: string) => {
 		const res = api.patch(`/subject/${subjectID}`, { abscences: type === 'add' ? (subjectAbscences as number) + 1 : (subjectAbscences as number) - 1 });
 		loadData();
+	};
+
+	const initialValues: FormValues = {
+		description: '',
+		dueDate: '',
+		status: 'não feito'
 	};
 
 	return (
@@ -55,6 +110,53 @@ export const Subject = () => {
 					</Heading>
 					<VStack>
 					</VStack>
+					<Container
+						mt="10"
+						maxH="md"
+						maxW="container.lg"
+						bg="white"
+						borderRadius="md"
+						py="3"
+						display="flex"
+						flexDirection="column"
+						justifyContent="space-between"
+					>
+						<div>
+							<Flex
+								direction="row"
+								justifyContent="space-between"
+							>
+								<Heading>Tarefas</Heading>
+								<Button
+									bg="studyt.dark"
+									color="white"
+									onClick={onOpen}
+								>+ Criar tarefa</Button>
+							</Flex>
+							<Table variant="simple">
+								<Thead>
+									<Tr>
+										<Th>Descrição</Th>
+										<Th>Prazo</Th>
+										<Th>Status</Th>
+									</Tr>
+								</Thead>
+								<Tbody>
+									{tasks &&
+										tasks.map((t) => (
+											<Tasks
+												description={t.description}
+												dueDate={t.dueDate}
+												status={t.status}
+												_id={t._id}
+												key={t._id}
+											/>
+										))}
+								</Tbody>
+							</Table>
+						</div>
+
+					</Container>
 				</Container>
 				<Container
 					mt="10"
@@ -81,6 +183,96 @@ export const Subject = () => {
 					</Center>
 				</Container>
 			</Flex>
+
+			<Modal size="3xl" onClose={onClose} isOpen={isOpen} isCentered>
+				<ModalOverlay />
+				<ModalContent>
+					<ModalHeader fontSize="2rem" color="studyt.dark">
+						Criar nova tarefa
+					</ModalHeader>
+					<ModalCloseButton />
+					<ModalBody>
+						<Text fontSize="1.3rem" color="studyt.dark" mb="2rem">
+							Crie uma tarefa para organizar as atividades da sua disciplina.
+						</Text>
+						<Formik
+							initialValues={initialValues}
+							validationSchema={TaskSchema}
+							onSubmit={(values) => {
+								console.log(values);
+								onSubmitTask(values);
+								onClose();
+							}}
+						>
+							{(props) => (
+								<Form>
+									<VStack spacing="2">
+										<Field name="description">
+											{({ field, form }: FieldProps) => (
+												<FormControl
+													isInvalid={!!(form.errors.description && form.touched.description)}
+												>
+													<FormLabel color="studyt.dark" htmlFor="description">
+														Descreva a tarefa a ser feita
+													</FormLabel>
+													<Input
+														w="100%"
+														bg="#f1f1f1"
+														{...field}
+														id="description"
+														placeholder="Descrição da tarefa"
+													/>
+													<FormErrorMessage color="#FF2424">
+														{form.errors.description}
+													</FormErrorMessage>
+												</FormControl>
+											)}
+										</Field>
+										<Field name="dueDate">
+											{({ field, form }: FieldProps) => (
+												<FormControl
+													isInvalid={
+														!!(form.errors.dueDate && form.touched.dueDate)
+													}
+												>
+													<FormLabel color="studyt.dark" htmlFor="dueDate">
+														Data de entrega da tarefa
+													</FormLabel>
+													<Input
+														w="100%"
+														bg="#f1f1f1"
+														type="date"
+														{...field}
+														id="dueDate"
+														placeholder="Prazo final"
+													/>
+													<FormErrorMessage color="#FF2424">
+														{form.errors.dueDate}
+													</FormErrorMessage>
+												</FormControl>
+											)}
+										</Field>
+
+										<Box h="3" />
+										<Button
+											type="submit"
+											bg="studyt.dark"
+											color="white"
+											w="100%"
+											_hover={{
+												background: 'studyt.light',
+											}}
+										>
+											Criar tarefa
+										</Button>
+									</VStack>
+								</Form>
+							)}
+						</Formik>
+					</ModalBody>
+					<ModalFooter></ModalFooter>
+				</ModalContent>
+			</Modal>
 		</motion.div>
 	);
 };

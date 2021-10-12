@@ -2,7 +2,7 @@ import {
 	Tr,
 	Td,
 } from '@chakra-ui/react';
-import { DeleteIcon } from '@chakra-ui/icons';
+import { CheckCircleIcon } from '@chakra-ui/icons';
 import moment from 'moment';
 import 'moment/locale/pt-br';
 import { api } from '../services/api';
@@ -11,7 +11,6 @@ interface TaskProps {
 	description: string;
 	dueDate: Date;
 	status: string;
-	subject: string;
 	_id: string;
 }
 
@@ -19,7 +18,6 @@ export const Tasks = ({
 	description,
 	dueDate,
 	status,
-	subject,
 	_id,
 }: TaskProps) => {
 
@@ -33,9 +31,8 @@ export const Tasks = ({
 			<Td>{moment(dueDate).locale('pt-br').format('LL')}</Td>
 
 			<Td>{status}</Td>
-			<Td>{subject}</Td>
 			<Td>
-				<DeleteIcon onClick={() => onClick} />
+				<CheckCircleIcon color="green" onClick={() => onClick} />
 			</Td>
 		</Tr>
 	);
