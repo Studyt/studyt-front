@@ -128,7 +128,7 @@ export const Home = () => {
 			<Flex bg="studyt.bg" minH="90vh">
 				<Container
 					mt="10"
-					maxH="md"
+
 					maxW="container.lg"
 					bg="white"
 					borderRadius="md"
