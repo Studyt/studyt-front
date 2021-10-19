@@ -28,6 +28,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
+	Select
 } from '@chakra-ui/react';
 import { api } from '../services/api';
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
@@ -40,7 +41,6 @@ import { Grades } from '../components/grades';
 interface FormValues {
 	description: string;
 	dueDate: string;
-	status: string;
 }
 
 const TaskSchema = Yup.object().shape({
@@ -71,7 +71,12 @@ export const Subject = () => {
 	const loadData = async () => {
 		const res = await api.get<{ label: string, abscences: number, maxAbscences: number, tasks: Task[], grades: Grade[] }>(`/subject/${subjectID}`);
 		console.table(res);
-		setTasks(res.data?.tasks);
+		setTasks(res.data?.tasks.sort((a, b) => {
+			if(a.status === "Fazendo") return -1;
+			if(a.status === "Concluido") return 1;
+			if(a.status === "A Fazer") return 0;
+			return 2;
+		}));
 		setGrades(res.data?.grades);
 		setSubjectLabel(res.data?.label);
 		setSubjectAbscences(res.data?.abscences);
@@ -88,8 +93,7 @@ export const Subject = () => {
 
 	const initialValues: FormValues = {
 		description: '',
-		dueDate: '',
-		status: 'não feito'
+		dueDate: ''
 	};
 
 	return (
@@ -223,6 +227,7 @@ export const Subject = () => {
 											status={t.status}
 											_id={t._id}
 											key={t._id}
+											loadData={loadData}
 										/>
 									))}
 							</Tbody>
