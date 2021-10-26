@@ -15,6 +15,7 @@ import {
 	Th,
 	Thead,
 	Tr,
+	Td,
 	useDisclosure,
 	Box,
 	FormControl,
@@ -43,12 +44,26 @@ interface FormValues {
 	dueDate: string;
 }
 
+interface FormGradeValues {
+	grade: number;
+	weight: number;
+}
+
 const TaskSchema = Yup.object().shape({
 	description: Yup.string()
 		.max(40, 'A descrição da tarefa não pode ultrapassar 40 caracteres')
 		.required('Obrigatório'),
 	dueDate: Yup.date()
 		.typeError('Insira uma data válida')
+		.required('Obrigatório'),
+});
+
+const GradeSchema = Yup.object().shape({
+	grade: Yup.number()
+		.typeError('Insira um número válido')
+		.required('Obrigatório'),
+	weight: Yup.number()
+		.typeError('Insira um número válido')
 		.required('Obrigatório'),
 });
 
@@ -61,15 +76,22 @@ export const Subject = () => {
 		loadData();
 	};
 
+	const onSubmitGrade = async (GradeRegister: FormGradeValues) => {
+		await api.patch(`/subject/${subjectID}/grade`, { ...GradeRegister, subject: subjectID });
+		loadData();
+	};
+
 	const [tasks, setTasks] = useState<Task[]>();
 	const [grades, setGrades] = useState<Grade[]>();
 	const [subjectLabel, setSubjectLabel] = useState<string>();
 	const [subjectAbscences, setSubjectAbscences] = useState<number>();
+	const [subjectExams, setSubjectExams] = useState<number>();
 	const [subjectMaxAbscences, setSubjectMaxAbscences] = useState<number>();
 	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen: isOpenGrade, onOpen: onOpenGrade, onClose: onCloseGrade } = useDisclosure();
 
 	const loadData = async () => {
-		const res = await api.get<{ label: string, abscences: number, maxAbscences: number, tasks: Task[], grades: Grade[] }>(`/subject/${subjectID}`);
+		const res = await api.get<{ label: string, abscences: number, maxAbscences: number, exams: number, tasks: Task[], grades: Grade[] }>(`/subject/${subjectID}`);
 		console.table(res);
 		setTasks(res.data?.tasks.sort((a, b) => {
 			if(a.status === "Fazendo") return -1;
@@ -81,6 +103,7 @@ export const Subject = () => {
 		setSubjectLabel(res.data?.label);
 		setSubjectAbscences(res.data?.abscences);
 		setSubjectMaxAbscences(res.data?.maxAbscences);
+		setSubjectExams(res.data?.exams);
 	};
 	useEffect(() => {
 		loadData();
@@ -89,6 +112,11 @@ export const Subject = () => {
 	const changeAbscences = (type: string) => {
 		const res = api.patch(`/subject/${subjectID}`, { abscences: type === 'add' ? (subjectAbscences as number) + 1 : (subjectAbscences as number) - 1 });
 		loadData();
+	};
+
+	const initialGradeValues: FormGradeValues = {
+		grade: 0,
+		weight: 1
 	};
 
 	const initialValues: FormValues = {
@@ -133,11 +161,12 @@ export const Subject = () => {
 							<Heading>
 								Notas
 							</Heading>
-							<Button
+							{subjectExams === grades?.length ? ('') : (<Button
 								bg="studyt.dark"
 								color="white"
-								onClick={onOpen}
-							>+ Inserir nota</Button>
+								onClick={onOpenGrade}
+							>+ Inserir nota</Button>) } 
+							
 
 						</Flex>
 						<Table variant="simple">
@@ -157,6 +186,10 @@ export const Subject = () => {
 											key={g._id}
 										/>
 									))}
+								<Tr>
+									<Td><b>Média</b></Td>
+									<Td>10</Td>
+								</Tr>
 							</Tbody>
 						</Table>
 
@@ -326,6 +359,96 @@ export const Subject = () => {
 					<ModalFooter></ModalFooter>
 				</ModalContent>
 			</Modal>
+
+			<Modal size="3xl" onClose={onCloseGrade} isOpen={isOpenGrade} isCentered>
+				<ModalOverlay />
+				<ModalContent>
+					<ModalHeader fontSize="2rem" color="studyt.dark">
+						Notas
+					</ModalHeader>
+					<ModalCloseButton />
+					<ModalBody>
+						<Text fontSize="1.3rem" color="studyt.dark" mb="2rem">
+							Insira a nota da disciplina.
+						</Text>
+						<Formik
+							initialValues={initialGradeValues}
+							validationSchema={GradeSchema}
+							onSubmit={(values) => {
+								console.log(values);
+								onSubmitGrade(values);
+								onCloseGrade();
+							}}
+						>
+							{(props) => (
+								<Form>
+									<VStack spacing="2">
+										<Field name="grade">
+											{({ field, form }: FieldProps) => (
+												<FormControl
+													isInvalid={!!(form.errors.grade && form.touched.grade)}
+												>
+													<FormLabel color="studyt.dark" htmlFor="grade">
+														Nota
+													</FormLabel>
+													<Input
+														w="100%"
+														bg="#f1f1f1"
+														{...field}
+														id="grade"
+														placeholder=""
+													/>
+													<FormErrorMessage color="#FF2424">
+														{form.errors.grade}
+													</FormErrorMessage>
+												</FormControl>
+											)}
+										</Field>
+										<Field name="weight">
+											{({ field, form }: FieldProps) => (
+												<FormControl
+													isInvalid={
+														!!(form.errors.weight && form.touched.weight)
+													}
+												>
+													<FormLabel color="studyt.dark" htmlFor="weight">
+														Peso
+													</FormLabel>
+													<Input
+														w="100%"
+														bg="#f1f1f1"
+														{...field}
+														id="weight"
+														placeholder=""
+													/>
+													<FormErrorMessage color="#FF2424">
+														{form.errors.weight}
+													</FormErrorMessage>
+												</FormControl>
+											)}
+										</Field>
+
+										<Box h="3" />
+										<Button
+											type="submit"
+											bg="studyt.dark"
+											color="white"
+											w="100%"
+											_hover={{
+												background: 'studyt.light',
+											}}
+										>
+											Atualizar notas
+										</Button>
+									</VStack>
+								</Form>
+							)}
+						</Formik>
+					</ModalBody>
+					<ModalFooter></ModalFooter>
+				</ModalContent>
+			</Modal>
 		</motion.div>
+		
 	);
 };
