@@ -47,6 +47,7 @@ interface FormValues {
 interface FormGradeValues {
 	grade: number;
 	weight: number;
+	date?: Date;
 }
 
 const TaskSchema = Yup.object().shape({
@@ -64,6 +65,9 @@ const GradeSchema = Yup.object().shape({
 		.required('Obrigatório'),
 	weight: Yup.number()
 		.typeError('Insira um número válido')
+		.required('Obrigatório'),
+	date: Yup.date()
+		.typeError('Insira uma data válida')
 		.required('Obrigatório'),
 });
 
@@ -83,7 +87,8 @@ export const Subject = () => {
 
 	const [tasks, setTasks] = useState<Task[]>();
 	const [grades, setGrades] = useState<Grade[]>();
-	const [subjectLabel, setSubjectLabel] = useState<string>();
+	const [subjectLabel, setSubjectLabel] = useState<string>();	
+	const [averageGrade, setAverageGrade] = useState<number>();
 	const [subjectAbscences, setSubjectAbscences] = useState<number>();
 	const [subjectExams, setSubjectExams] = useState<number>();
 	const [subjectMaxAbscences, setSubjectMaxAbscences] = useState<number>();
@@ -92,22 +97,32 @@ export const Subject = () => {
 
 	const loadData = async () => {
 		const res = await api.get<{ label: string, abscences: number, maxAbscences: number, exams: number, tasks: Task[], grades: Grade[] }>(`/subject/${subjectID}`);
-		console.table(res);
+		// console.table(res.data);
 		setTasks(res.data?.tasks.sort((a, b) => {
 			if(a.status === "Fazendo") return -1;
 			if(a.status === "Concluido") return 1;
 			if(a.status === "A Fazer") return 0;
 			return 2;
 		}));
-		setGrades(res.data?.grades);
+		setGrades(res.data?.grades);		
 		setSubjectLabel(res.data?.label);
 		setSubjectAbscences(res.data?.abscences);
 		setSubjectMaxAbscences(res.data?.maxAbscences);
 		setSubjectExams(res.data?.exams);
+
+		const averageWeight = res.data?.grades.reduce((accum,item) => accum + item.weight, 0) as number;
+		const totalGrades = res.data?.grades.reduce((accum,item) => accum + (item.grade * item.weight), 0) as number;
+
+		setAverageGrade(totalGrades / averageWeight);
 	};
+
+	
+
 	useEffect(() => {
-		loadData();
+		loadData();	
 	}, []);
+
+	
 
 	const changeAbscences = (type: string) => {
 		const res = api.patch(`/subject/${subjectID}`, { abscences: type === 'add' ? (subjectAbscences as number) + 1 : (subjectAbscences as number) - 1 });
@@ -116,7 +131,7 @@ export const Subject = () => {
 
 	const initialGradeValues: FormGradeValues = {
 		grade: 0,
-		weight: 1
+		weight: 1,		
 	};
 
 	const initialValues: FormValues = {
@@ -188,7 +203,7 @@ export const Subject = () => {
 									))}
 								<Tr>
 									<Td><b>Média</b></Td>
-									<Td>10</Td>
+									<Td>{averageGrade?.toFixed(2) || 0}</Td>
 								</Tr>
 							</Tbody>
 						</Table>
@@ -247,6 +262,7 @@ export const Subject = () => {
 							<Thead>
 								<Tr>
 									<Th>Descrição</Th>
+									<Th>Criado</Th>
 									<Th>Prazo</Th>
 									<Th>Status</Th>
 								</Tr>
@@ -256,6 +272,7 @@ export const Subject = () => {
 									tasks.map((t) => (
 										<Tasks
 											description={t.description}
+											createdAt={t.createdAt}
 											dueDate={t.dueDate}
 											status={t.status}
 											_id={t._id}
@@ -423,6 +440,31 @@ export const Subject = () => {
 													/>
 													<FormErrorMessage color="#FF2424">
 														{form.errors.weight}
+													</FormErrorMessage>
+												</FormControl>
+											)}
+										</Field>
+
+										<Field name="date">
+											{({ field, form }: FieldProps) => (
+												<FormControl
+													isInvalid={
+														!!(form.errors.date && form.touched.date)
+													}
+												>
+													<FormLabel color="studyt.dark" htmlFor="date">
+														Data da Prova
+													</FormLabel>
+													<Input
+														w="100%"
+														bg="#f1f1f1"
+														type="date"
+														{...field}
+														id="date"
+														placeholder="Prazo final"
+													/>
+													<FormErrorMessage color="#FF2424">
+														{form.errors.date}
 													</FormErrorMessage>
 												</FormControl>
 											)}

@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
+import { PersistGate } from 'redux-persist/integration/react';
 
 import "@fontsource/nunito/200.css";
 import "@fontsource/nunito/300.css";
@@ -11,17 +12,19 @@ import "@fontsource/nunito/700.css";
 
 import reportWebVitals from "./reportWebVitals";
 import { Routes } from "./routes";
-import { store } from "./store";
+import { store, persistor } from "./store";
 import { theme } from "./theme";
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
       <ChakraProvider resetCSS theme={theme}>
         <Router>
           <Routes />
         </Router>
       </ChakraProvider>
+      </PersistGate>
     </Provider>
   </React.StrictMode>,
   document.getElementById("root")

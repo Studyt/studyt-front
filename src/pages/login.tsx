@@ -59,7 +59,7 @@ export const Login = () => {
         email,
         password,
       });
-      console.table(res);
+      // console.table(res);
       api.setHeader("Authorization", `Bearer ${res.data?.token}` as string);
       const decoded: LoginResponse = verify(
         res.data?.token as string,

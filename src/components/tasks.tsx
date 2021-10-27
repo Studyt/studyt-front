@@ -10,6 +10,7 @@ import { api } from '../services/api';
 
 interface TaskProps {
 	description: string;
+	createdAt: Date;
 	dueDate: Date;
 	status: string;
 	_id: string;
@@ -18,6 +19,7 @@ interface TaskProps {
 
 export const Tasks = ({
 	description,
+	createdAt,
 	dueDate,
 	status,
 	_id,
@@ -37,7 +39,8 @@ export const Tasks = ({
 
 	return (
 		<Tr>
-			<Td>{description}</Td>
+			<Td>{description}</Td>			
+			<Td>{moment(createdAt).locale('pt-br').format('LL')}</Td>
 			<Td>{moment(dueDate).locale('pt-br').format('LL')}</Td>
 
 			<Td>
