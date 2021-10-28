@@ -29,7 +29,7 @@ import {
 	Center,
 	Spacer
 } from '@chakra-ui/react';
-import { AreaChart, XAxis,YAxis,Tooltip, Area, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { AreaChart, XAxis, YAxis, Tooltip, Area, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { Field, FieldProps, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 
@@ -91,36 +91,36 @@ export const Home = () => {
 	const { isOpen: isOpenFeedback, onOpen: onOpenFeedback, onClose: onCloseFeedback } = useDisclosure();
 
 	const [subjects, setSubjects] = useState<Subject[]>();
-	const [chartData, setChartData] = useState <Record<string, unknown>[]>();
+	const [chartData, setChartData] = useState<Record<string, unknown>[]>();
 	const [countdownTasks, setCountdownTasks] = useState<Task[]>();
 	const [chartKeys, setChartKeys] = useState<string[]>();
 
 
 	const loadData = async () => {
 		const res = await api.get<Subject[]>('/subject');
-		
+
 		setSubjects(res.data);
 
-		const tasks = res.data?.map( subject => {
-			return subject.tasks.filter(task=> moment(task.dueDate).isBetween(moment(),moment().add(7,'days')));
-		}).flat().sort((a,b) => {
-			return moment(a.dueDate).diff(moment(b.dueDate));			
+		const tasks = res.data?.map(subject => {
+			return subject.tasks.filter(task => moment(task.dueDate).add(1, 'day').isBetween(moment(), moment().add(7, 'days')));
+		}).flat().sort((a, b) => {
+			return moment(a.dueDate).diff(moment(b.dueDate));
 		});
 
-		setCountdownTasks(tasks);		
+		setCountdownTasks(tasks);
 
 		const data = res.data?.map(sub => {
-			return sub.grades.map( (grade, index) => ({name: moment(grade.date).locale('pt-br').format('L') , [sub.label]: grade.grade}));
-		}).flat().sort((a,b) => a.name.localeCompare(b.name));
+			return sub.grades.map((grade, index) => ({ name: moment(grade.date).locale('pt-br').format('L'), [sub.label]: grade.grade }));
+		}).flat().sort((a, b) => a.name.localeCompare(b.name));
 		// console.log(data);
 		setChartData(data);
 
-		setChartKeys([... new Set(data?.map( d => {
-			const {name, ...pointData } = d;
+		setChartKeys([... new Set(data?.map(d => {
+			const { name, ...pointData } = d;
 			return Object.keys(pointData)[0];
 		}))]);
 
-		
+
 	};
 
 
@@ -157,32 +157,31 @@ export const Home = () => {
 		>
 			<Flex bg="studyt.bg" minH="90vh" flexDirection="column" alignItems="center">
 				<Flex width="container.lg" justifyContent="space-between">
-				
+
 					<Container
-						mt="10"						
+						mt="10"
 						bg="white"
 						borderRadius="md"
 						py="3"
 						display="flex"
 						flexDirection="column"
-						justifyContent="space-between"				
 						maxW="47%"
-						marginX="0"				
+						marginX="0"
 					>
 						<Flex
 							direction="row"
 							justifyContent="space-between"
 						>
 							<Heading>Insights</Heading>
-							<Text fontSize="1.3rem" color="studyt.dark" mb="2rem">
-								Algum texto aqui
-							</Text>
 						</Flex>
-					
-					</Container>					
+						<Heading fontSize="1.3rem" color="studyt.dark" mb="2rem">
+							WIP
+						</Heading>
+
+					</Container>
 
 					<Container
-						mt="10"						
+						mt="10"
 						bg="white"
 						borderRadius="md"
 						py="3"
@@ -190,29 +189,29 @@ export const Home = () => {
 						flexDirection="column"
 						justifyContent="space-between"
 						maxW="47%"
-						marginX="0"				
+						marginX="0"
 					>
 						<Flex
 							direction="column"
 							justifyContent="space-between"
 						>
-							<Heading>Countdown</Heading>				
+							<Heading>Countdown</Heading>
 
 							<Table variant="simple">
 								<Thead>
 									<Tr>
 										<Th>Tarefa</Th>
-										<Th>Data de entrega</Th>												
+										<Th>Data de entrega</Th>
 									</Tr>
 								</Thead>
 								<Tbody>
 									{countdownTasks &&
-									countdownTasks.map((t) => (
-										<Tr key={t._id}>
-											<Td>{t.description}</Td>
-											<Td>{moment(t.dueDate).locale('pt-br').format('LL')}</Td>
-										</Tr>
-									))}
+										countdownTasks.map((t) => (
+											<Tr key={t._id}>
+												<Td>{t.description}</Td>
+												<Td>{moment(t.dueDate).locale('pt-br').format('LL')}</Td>
+											</Tr>
+										))}
 								</Tbody>
 							</Table>
 						</Flex>
@@ -229,7 +228,7 @@ export const Home = () => {
 					flexDirection="column"
 					justifyContent="space-between"
 				>
-					<div>						
+					<div>
 						<Flex
 							direction="row"
 							justifyContent="space-between"
@@ -246,20 +245,20 @@ export const Home = () => {
 							<AreaChart data={chartData}>
 								<defs>
 									<linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="5%" stopColor="#C080FF" stopOpacity={0.8}/>
-										<stop offset="95%" stopColor="#C080FF" stopOpacity={0}/>
-									</linearGradient>								
+										<stop offset="5%" stopColor="#C080FF" stopOpacity={0.8} />
+										<stop offset="95%" stopColor="#C080FF" stopOpacity={0} />
+									</linearGradient>
 								</defs>
 								<XAxis dataKey="name" />
 								<YAxis />
 								<CartesianGrid strokeDasharray="3 3" />
 								<Tooltip />
-							
-								{chartKeys?.map( (c, index) => {																
-									return <Area type="monotone" dataKey={c} stroke="#3F004B" fillOpacity={1} fill="url(#colorUv)" key={index.toString()} connectNulls/>;
-								})}								
+
+								{chartKeys?.map((c, index) => {
+									return <Area type="monotone" dataKey={c} stroke="#3F004B" fillOpacity={1} fill="url(#colorUv)" key={index.toString()} connectNulls />;
+								})}
 							</AreaChart>
-						</ResponsiveContainer>						
+						</ResponsiveContainer>
 
 						<Table variant="simple" mt='1.5rem'>
 							<Thead>

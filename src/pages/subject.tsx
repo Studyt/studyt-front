@@ -60,10 +60,10 @@ const TaskSchema = Yup.object().shape({
 });
 
 const GradeSchema = Yup.object().shape({
-	grade: Yup.number()
+	grade: Yup.number().min(0, 'A nota precisa ser maior ou igual a 0').max(10, 'A nota só pode ser no máximo 10')
 		.typeError('Insira um número válido')
 		.required('Obrigatório'),
-	weight: Yup.number()
+	weight: Yup.number().min(1, 'O peso precisa ser um número maior que 0')
 		.typeError('Insira um número válido')
 		.required('Obrigatório'),
 	date: Yup.date()
@@ -87,7 +87,7 @@ export const Subject = () => {
 
 	const [tasks, setTasks] = useState<Task[]>();
 	const [grades, setGrades] = useState<Grade[]>();
-	const [subjectLabel, setSubjectLabel] = useState<string>();	
+	const [subjectLabel, setSubjectLabel] = useState<string>();
 	const [averageGrade, setAverageGrade] = useState<number>();
 	const [subjectAbscences, setSubjectAbscences] = useState<number>();
 	const [subjectExams, setSubjectExams] = useState<number>();
@@ -99,30 +99,30 @@ export const Subject = () => {
 		const res = await api.get<{ label: string, abscences: number, maxAbscences: number, exams: number, tasks: Task[], grades: Grade[] }>(`/subject/${subjectID}`);
 		// console.table(res.data);
 		setTasks(res.data?.tasks.sort((a, b) => {
-			if(a.status === "Fazendo") return -1;
-			if(a.status === "Concluido") return 1;
-			if(a.status === "A Fazer") return 0;
+			if (a.status === "Fazendo") return -1;
+			if (a.status === "Concluido") return 1;
+			if (a.status === "A Fazer") return 0;
 			return 2;
 		}));
-		setGrades(res.data?.grades);		
+		setGrades(res.data?.grades);
 		setSubjectLabel(res.data?.label);
 		setSubjectAbscences(res.data?.abscences);
 		setSubjectMaxAbscences(res.data?.maxAbscences);
 		setSubjectExams(res.data?.exams);
 
-		const averageWeight = res.data?.grades.reduce((accum,item) => accum + item.weight, 0) as number;
-		const totalGrades = res.data?.grades.reduce((accum,item) => accum + (item.grade * item.weight), 0) as number;
+		const averageWeight = res.data?.grades.reduce((accum, item) => accum + item.weight, 0) as number;
+		const totalGrades = res.data?.grades.reduce((accum, item) => accum + (item.grade * item.weight), 0) as number;
 
 		setAverageGrade(totalGrades / averageWeight);
 	};
 
-	
+
 
 	useEffect(() => {
-		loadData();	
+		loadData();
 	}, []);
 
-	
+
 
 	const changeAbscences = (type: string) => {
 		const res = api.patch(`/subject/${subjectID}`, { abscences: type === 'add' ? (subjectAbscences as number) + 1 : (subjectAbscences as number) - 1 });
@@ -131,7 +131,7 @@ export const Subject = () => {
 
 	const initialGradeValues: FormGradeValues = {
 		grade: 0,
-		weight: 1,		
+		weight: 1,
 	};
 
 	const initialValues: FormValues = {
@@ -180,8 +180,8 @@ export const Subject = () => {
 								bg="studyt.dark"
 								color="white"
 								onClick={onOpenGrade}
-							>+ Inserir nota</Button>) } 
-							
+							>+ Inserir nota</Button>)}
+
 
 						</Flex>
 						<Table variant="simple">
@@ -491,6 +491,6 @@ export const Subject = () => {
 				</ModalContent>
 			</Modal>
 		</motion.div>
-		
+
 	);
 };

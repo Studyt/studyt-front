@@ -14,7 +14,7 @@ interface TaskProps {
 	dueDate: Date;
 	status: string;
 	_id: string;
-	loadData: ()=> Promise<void>;
+	loadData: () => Promise<void>;
 }
 
 export const Tasks = ({
@@ -33,21 +33,21 @@ export const Tasks = ({
 
 	const iconStrategy = {
 		"Concluido": "green.500",
-    	"A Fazer": "red.500",
+		"A Fazer": "red.500",
 		"Fazendo": "orange.400"
 	};
 
 	return (
 		<Tr>
-			<Td>{description}</Td>			
+			<Td>{description}</Td>
 			<Td>{moment(createdAt).locale('pt-br').format('LL')}</Td>
-			<Td>{moment(dueDate).locale('pt-br').format('LL')}</Td>
+			<Td>{moment(dueDate).add(1, 'day').locale('pt-br').format('LL')}</Td>
 
 			<Td>
 				<Select onChange={onSelect} value={status} size="sm">
-  					<option value="Fazendo">Fazendo</option>
-  					<option value="A Fazer">A Fazer</option>
-  					<option value="Concluido">Concluído</option>
+					<option value="Fazendo">Fazendo</option>
+					<option value="A Fazer">A Fazer</option>
+					<option value="Concluido">Concluído</option>
 				</Select>
 			</Td>
 			<Td>

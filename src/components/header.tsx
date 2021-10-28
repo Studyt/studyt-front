@@ -23,11 +23,6 @@ export const Header = () => {
 							Dashboard
 						</Heading>
 					</Link>
-					<Link to="/tarefas">
-						<Heading as="h3" size="md" color="white">
-							Tarefas
-						</Heading>
-					</Link>
 				</HStack>
 				<Spacer />
 				<Box w="60%" />
